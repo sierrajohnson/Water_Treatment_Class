@@ -1,0 +1,132 @@
+---
+title: R Example
+engine: knitr
+format: live-html
+webr:
+  packages:
+    - dplyr
+    - tidywater
+  repos:
+    - https://brownandcaldwell-public.r-universe.dev
+---
+
+{{< include ./_extensions/r-wasm/live/_knitr.qmd >}}
+{{< include ./_extensions/r-wasm/live/_gradethis.qmd >}}
+
+## Getting Started
+
+For most water treatment modeling, you'll need the `dplyr` and `tidywater` packages, so these are already loaded in the background.
+
+First, you'll need to create a `water` object for your modeling using `define_water`. Notice that the function will warn you about assumptions it is making. You can see what's in a `water` using `@` with the parameter name. Most parameters are all lowercase, either the chemical formula or the common name.
+
+```{webr}
+
+waterA <- define_water(ph = 7, alk = 100, ca = 50, doc = 2.5)
+
+waterA@ph
+waterA@alk
+
+```
+
+Now try creating a water with a known TOC = 2.5 mg/L and TDS = 100 mg/L.
+
+```{webr}
+#| exercise: ex_1
+waterB <- define_water(ph = 7, alk = 100, ______)
+```
+
+::: { .solution exercise="ex_1" }
+::: { .callout-tip title="Solution" collapse="false"}
+Add `toc` and `tds` arguments to the water.
+
+```{webr}
+#| exercise: ex_1
+#| solution: true
+waterB <- define_water(ph = 7, alk = 100, toc = 2.5, tds = 100)
+```
+
+:::
+:::
+
+```{webr}
+#| exercise: ex_1
+#| check: true
+gradethis::grade_this_code()
+```
+
+### Coagulation Example
+After you have a `water`, you can apply treatment to it. `tidywater` functions follow the naming convention: `treatment_model`. Treatment is the treatment being applied to the water, such as dosing chemical (`chemdose`) or applying ozone (`ozonate`). Model refers to the family of parameters that you are solving for, such as pH/alkalinity (`ph`), DOC/TOC (`toc`), or TTHMs/HAA5 (`dbp`).
+
+So if you apply a coagulant, you are typically interested in solving for the new pH (use `chemdose_ph`) and also the new DOC (use `chemdose_toc`).
+
+Start by finding the pH of waterC after dosing 30 mg/L of alum.
+
+```{webr}
+#| exercise: ex_2
+waterC <- define_water(ph = 7, alk = 100, toc = 2.5, doc = 2.2, uv254 = .015)
+waterC_phAdjusted <- chemdose_ph(waterC, ______)
+waterC_phAdjusted@______
+```
+
+::: { .solution exercise="ex_2" }
+::: { .callout-tip title="Solution" collapse="false"}
+Add an `alum` argument to `chemdose_ph`, then print the pH of the new water.
+
+```{webr}
+#| exercise: ex_2
+#| solution: true
+waterC <- define_water(ph = 7, alk = 100, toc = 2.5, doc = 2.2, uv254 = .015)
+waterC_phAdjusted <- chemdose_ph(waterC, alum = 30)
+waterC_phAdjusted@ph
+```
+
+:::
+:::
+
+```{webr}
+#| exercise: ex_2
+#| check: true
+gradethis::grade_this_code()
+```
+
+
+Now find the coagulated TOC of waterC after adding 30 mg/L of alum.
+
+```{webr}
+#| exercise: ex_3
+waterC <- define_water(ph = 7, alk = 100, toc = 2.5, doc = 2.2, uv254 = .015)
+waterC_phAdjusted <- ______(waterC, ______)
+waterC_coagulated <- chemdose_toc(______, ______)
+waterC_coagulated@toc
+```
+
+::: { .solution exercise="ex_3" }
+::: { .callout-tip title="Solution" collapse="false"}
+Apply `chemdose_ph` first to make sure your water has the correct pH, then apply `chemdose_toc`. You will need the alum argument in both.
+
+```{webr}
+#| exercise: ex_3
+#| solution: true
+waterC <- define_water(ph = 7, alk = 100, toc = 2.5, doc = 2.2, uv254 = .015)
+waterC_phAdjusted <- chemdose_ph(waterC, alum = 30)
+waterC_coagulated <- chemdose_toc(waterC_phAdjusted, alum = 30)
+waterC_coagulated@toc
+```
+
+:::
+:::
+
+```{webr}
+#| exercise: ex_3
+#| check: true
+gradethis::grade_this_code()
+```
+
+
+
+```{webr}
+#| exercise: ex_3
+#| setup: true
+# example setup code
+foo <- sample.int(100, 10)
+```
