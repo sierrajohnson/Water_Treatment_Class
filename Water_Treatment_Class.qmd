@@ -138,7 +138,9 @@ foo <- sample.int(100, 10)
 library(shiny)
 library(googlesheets4)
 
-gs4_auth(email = "sunnyrafter@gmail.com")
+gcp_json <- Sys.getenv("GOOGLE_CREDENTIALS")
+
+gs4_auth(path = gcp_json)
 
 sheet_id <- "1W4c_4NcbMKRcXiUDgySiJkrpqJwByYQXpJ84S4AmA1Y"
 sheet_name <- "responses"
