@@ -6,6 +6,8 @@ webr:
   packages:
     - dplyr
     - tidywater
+    - shiny
+    - googlesheets4
   repos:
     - https://brownandcaldwell-public.r-universe.dev
 ---
@@ -130,3 +132,38 @@ gradethis::grade_this_code()
 # example setup code
 foo <- sample.int(100, 10)
 ```
+
+
+```{r, setup = TRUE, echo = FALSE}
+library(shiny)
+library(googlesheets4)
+
+gs4_auth(email = "sunnyrafter@gmail.com")
+
+sheet_id <- "1W4c_4NcbMKRcXiUDgySiJkrpqJwByYQXpJ84S4AmA1Y"
+sheet_name <- "responses"
+```
+
+```{r, echo = FALSE}
+
+ui <- fluidPage( titlePanel("Interactive Exercise"),
+                 sidebarLayout( sidebarPanel( textInput("name", "Enter your name:"),
+                                              textAreaInput("code", "Write your R code here:", "", rows = 5),
+                                              actionButton("submit", "Submit") ),
+                                mainPanel( textOutput("confirmation") ) ) )
+
+server <- function(input, output, session) {
+  observeEvent(input$submit,
+               {
+
+                 response <- data.frame( Name = input$name, Code = input$code, Timestamp = Sys.time() )
+                 sheet_append(sheet_id, response, sheet = sheet_name)
+
+
+                 output$confirmation <- renderText({ paste("Thank you,", input$name, "! Your response has been recorded.") })
+               }) }
+
+shinyApp(ui, server)
+
+```
+
