@@ -10,6 +10,7 @@ webr:
     - googlesheets4
   repos:
     - https://brownandcaldwell-public.r-universe.dev
+server: shiny
 ---
 
 {{< include ./_extensions/r-wasm/live/_knitr.qmd >}}
@@ -134,9 +135,24 @@ foo <- sample.int(100, 10)
 ```
 
 
-```{r, setup = TRUE, echo = FALSE}
-library(shiny)
-library(googlesheets4)
+```{r}
+sliderInput("bins", "Number of bins:", min = 1, max = 50, value = 30)
+plotOutput("distPlot")
+```
+
+The data consists of 299 pairs of measurements, referring to the time interval
+between the starts of successive eruptions and the duration of the subsequent
+eruption.
+
+Click the **Code** button above to see the source code for this example.
+
+```{r}
+#| context: server
+output$distPlot <- renderPlot({
+  x <- faithful[, 2]  # Old Faithful Geyser data
+  bins <- seq(min(x), max(x), length.out = input$bins + 1)
+  hist(x, breaks = bins, col = 'darkgray', border = 'white')
+})
 
 gcp_json <- Sys.getenv("GOOGLE_CREDENTIALS")
 
@@ -145,27 +161,3 @@ gs4_auth(path = gcp_json)
 sheet_id <- "1W4c_4NcbMKRcXiUDgySiJkrpqJwByYQXpJ84S4AmA1Y"
 sheet_name <- "responses"
 ```
-
-```{r, echo = FALSE}
-
-ui <- fluidPage( titlePanel("Interactive Exercise"),
-                 sidebarLayout( sidebarPanel( textInput("name", "Enter your name:"),
-                                              textAreaInput("code", "Write your R code here:", "", rows = 5),
-                                              actionButton("submit", "Submit") ),
-                                mainPanel( textOutput("confirmation") ) ) )
-
-server <- function(input, output, session) {
-  observeEvent(input$submit,
-               {
-
-                 response <- data.frame( Name = input$name, Code = input$code, Timestamp = Sys.time() )
-                 sheet_append(sheet_id, response, sheet = sheet_name)
-
-
-                 output$confirmation <- renderText({ paste("Thank you,", input$name, "! Your response has been recorded.") })
-               }) }
-
-shinyApp(ui, server)
-
-```
-
